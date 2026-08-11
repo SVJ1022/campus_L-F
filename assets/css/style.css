@@ -1,0 +1,405 @@
+/* FINDLY - Campus Lost & Found Custom Stylesheet */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+:root {
+  --bg-page: #ffffff;
+  --bg-outer-card: #f4f4f6;
+  --bg-inner-card: #e8e8ec;
+  --bg-input: #ffffff;
+  --bg-pill-btn: #dedee3;
+  --bg-pill-hover: #d2d2d9;
+  
+  --primary-accent: #505ac9;
+  --primary-hover: #4049b7;
+  
+  --text-dark: #000000;
+  --text-body: #111111;
+  --text-muted: #666666;
+  --text-danger: #dc3545;
+  
+  --border-radius-outer: 24px;
+  --border-radius-inner: 20px;
+  --border-radius-input: 10px;
+  --border-radius-pill: 50px;
+}
+
+body {
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background-color: var(--bg-page);
+  color: var(--text-body);
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Header & Branding */
+.findly-header {
+  padding: 1.5rem 2rem;
+}
+
+.brand-logo-img {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+}
+
+.brand-title {
+  font-weight: 800;
+  font-size: 1.25rem;
+  line-height: 1.1;
+  color: var(--text-dark);
+  letter-spacing: 0.5px;
+}
+
+.brand-subtitle {
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--text-dark);
+  letter-spacing: 0.5px;
+}
+
+/* Pill Header Action Button */
+.btn-pill-action {
+  background-color: var(--bg-pill-btn);
+  color: var(--text-dark);
+  font-weight: 700;
+  font-size: 0.95rem;
+  padding: 0.5rem 1.25rem;
+  border-radius: var(--border-radius-pill);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  transition: all 0.2s ease-in-out;
+  border: none;
+}
+
+.btn-pill-action:hover {
+  background-color: var(--bg-pill-hover);
+  color: var(--text-dark);
+}
+
+/* Landing Page Hero Section */
+.hero-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 2rem 1.5rem 4rem 1.5rem;
+}
+
+.hero-title {
+  font-weight: 800;
+  font-size: clamp(2rem, 5vw, 3.25rem);
+  letter-spacing: 0.5px;
+  color: var(--text-dark);
+  margin-bottom: 0.75rem;
+  text-transform: uppercase;
+}
+
+.hero-subtitle {
+  font-weight: 500;
+  font-size: clamp(1rem, 2.5vw, 1.15rem);
+  color: #222222;
+  max-width: 720px;
+  margin-bottom: 3.5rem;
+  line-height: 1.4;
+}
+
+.hero-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  width: 100%;
+  max-width: 320px;
+}
+
+.btn-landing-action {
+  background-color: var(--bg-pill-btn);
+  color: var(--text-dark);
+  font-weight: 700;
+  font-size: 0.9rem;
+  letter-spacing: 0.5px;
+  padding: 0.85rem 1.5rem;
+  border-radius: 12px;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  transition: all 0.2s ease-in-out;
+  border: none;
+  box-shadow: none;
+}
+
+.btn-landing-action:hover {
+  background-color: var(--bg-pill-hover);
+  color: var(--text-dark);
+}
+
+.btn-landing-action i {
+  font-size: 1.1rem;
+}
+
+/* Outer Card Container (Login & Register) */
+.auth-wrapper {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+  background-color: var(--bg-page);
+}
+
+.auth-outer-card {
+  background-color: var(--bg-outer-card);
+  border-radius: var(--border-radius-outer);
+  width: 100%;
+  max-width: 960px;
+  padding: 2.5rem 3rem 3.5rem 3.5rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+}
+
+.auth-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+}
+
+.auth-title-section {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.auth-main-title {
+  font-weight: 800;
+  font-size: 1.25rem;
+  letter-spacing: 0.5px;
+  color: var(--text-dark);
+  text-transform: uppercase;
+  margin-bottom: 0.25rem;
+}
+
+.auth-main-subtitle {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #333333;
+  margin: 0;
+}
+
+/* Inner Form Container */
+.auth-inner-card {
+  background-color: var(--bg-inner-card);
+  border-radius: var(--border-radius-inner);
+  max-width: 440px;
+  margin: 0 auto;
+  padding: 2rem 2.25rem;
+}
+
+/* Form Controls */
+.form-group-custom {
+  margin-bottom: 1.25rem;
+}
+
+.form-label-custom {
+  font-weight: 800;
+  font-size: 0.85rem;
+  color: var(--text-dark);
+  margin-bottom: 0.4rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.form-label-custom i {
+  font-size: 1rem;
+}
+
+.form-control-custom {
+  background-color: var(--bg-input);
+  border: 1px solid transparent;
+  border-radius: var(--border-radius-input);
+  padding: 0.65rem 1rem;
+  font-size: 0.85rem;
+  color: var(--text-body);
+  width: 100%;
+  transition: all 0.2s ease;
+}
+
+.form-control-custom::placeholder {
+  color: #999999;
+  font-size: 0.8rem;
+}
+
+.form-control-custom:focus {
+  outline: none;
+  border-color: var(--primary-accent);
+  box-shadow: 0 0 0 3px rgba(80, 90, 201, 0.15);
+}
+
+.form-control-custom.is-invalid {
+  border-color: var(--text-danger);
+  background-image: none;
+}
+
+.invalid-feedback-custom {
+  color: var(--text-danger);
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-top: 0.3rem;
+  display: none;
+}
+
+.form-group-custom.has-error .invalid-feedback-custom {
+  display: block;
+}
+
+/* Helper Links & Buttons */
+.forgot-password-link {
+  display: block;
+  text-align: right;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #444444;
+  text-decoration: none;
+  margin-top: 0.4rem;
+}
+
+.forgot-password-link:hover {
+  color: var(--primary-accent);
+  text-decoration: underline;
+}
+
+.btn-primary-auth {
+  background-color: var(--primary-accent);
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 0.85rem;
+  padding: 0.55rem 2rem;
+  border-radius: var(--border-radius-pill);
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  display: inline-block;
+  text-decoration: none;
+}
+
+.btn-primary-auth:hover {
+  background-color: var(--primary-hover);
+  color: #ffffff;
+}
+
+.btn-secondary-pill {
+  background-color: var(--primary-accent);
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 0.7rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--border-radius-pill);
+  text-decoration: none;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  display: inline-block;
+  margin-left: 0.3rem;
+  border: none;
+}
+
+.btn-secondary-pill:hover {
+  background-color: var(--primary-hover);
+  color: #ffffff;
+}
+
+.auth-bottom-links {
+  margin-top: 1.25rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #333333;
+  text-align: center;
+}
+
+.back-to-home {
+  display: inline-block;
+  margin-top: 0.6rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #333333;
+  text-decoration: underline;
+}
+
+.back-to-home:hover {
+  color: var(--primary-accent);
+}
+
+/* Radio Account Type Selector */
+.account-type-group {
+  display: flex;
+  gap: 1rem;
+  margin-top: 0.3rem;
+}
+
+.account-type-option {
+  flex: 1;
+}
+
+.account-type-option input[type="radio"] {
+  display: none;
+}
+
+.account-type-label {
+  display: block;
+  text-align: center;
+  background-color: #ffffff;
+  padding: 0.5rem;
+  border-radius: var(--border-radius-input);
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #444;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.account-type-option input[type="radio"]:checked + .account-type-label {
+  border-color: var(--primary-accent);
+  color: var(--primary-accent);
+  background-color: rgba(80, 90, 201, 0.08);
+}
+
+/* Alert Notification Container */
+.alert-custom {
+  border-radius: 8px;
+  font-size: 0.82rem;
+  padding: 0.6rem 1rem;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .auth-outer-card {
+    padding: 1.75rem 1.25rem 2.25rem 1.25rem;
+    border-radius: 16px;
+  }
+  
+  .auth-inner-card {
+    padding: 1.5rem 1.25rem;
+    border-radius: 14px;
+  }
+  
+  .brand-title {
+    font-size: 1.1rem;
+  }
+  
+  .brand-subtitle {
+    font-size: 0.75rem;
+  }
+}
