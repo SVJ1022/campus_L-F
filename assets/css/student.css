@@ -1,0 +1,38 @@
+/* ============================================================
+   FINDLY — Student area additions
+   ============================================================ */
+
+/* Browse-first feel: generous hero search */
+.fin-browse-hero { margin-bottom: 22px; }
+.fin-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--fin-indigo-soft);
+  color: var(--fin-indigo-dark);
+  font-size: 0.8rem;
+  font-weight: 600;
+  border-radius: 999px;
+  padding: 6px 12px;
+}
+.fin-chip.dark { background: rgba(255, 255, 255, 0.15); color: #fff; }
+
+/* Quick actions for the student dashboard */
+.fin-quick {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: #fff;
+  border: 1px solid var(--fin-border);
+  border-radius: 12px;
+  font-weight: 600;
+  color: var(--fin-ink);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  height: 100%;
+}
+.fin-quick:hover { transform: translateY(-2px); box-shadow: var(--fin-shadow); color: var(--fin-ink); }
+.fin-quick i { font-size: 1.3rem; color: var(--fin-indigo); }
+
+/* Status legend */
+.fin-legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 0.8rem; color: var(--fin-slate); }

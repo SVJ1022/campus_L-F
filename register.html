@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Register — FINDLY</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="assets/css/style.css" rel="stylesheet">
+  <link href="assets/css/auth.css" rel="stylesheet">
+</head>
+<body class="auth-body">
+  <div class="auth-card wide">
+    <div class="text-center">
+      <span class="auth-logo"><i class="bi bi-person-plus"></i></span>
+      <h1 class="auth-title">Create your account</h1>
+      <p class="auth-sub">Public registration creates a <strong>Student</strong> account. Staff/Admin accounts are created by the administrator.</p>
+    </div>
+
+    <div class="alert alert-danger d-none" id="regError"></div>
+
+    <form id="regForm" novalidate class="row g-3">
+      <div class="col-md-6">
+        <label class="form-label" for="name">Full Name</label>
+        <input type="text" class="form-control" id="name" placeholder="e.g. Meet Patel" required>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label" for="email">Institute Email</label>
+        <input type="email" class="form-control" id="email" placeholder="you@ganpatuniversity.ac.in" required>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label" for="contactNo">Contact Number</label>
+        <input type="tel" class="form-control" id="contactNo" placeholder="98XXXXXXXX" required>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label" for="enrollmentNo">Enrollment Number</label>
+        <input type="text" class="form-control" id="enrollmentNo" placeholder="e.g. 20BECE1001" required>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label" for="password">Password</label>
+        <input type="password" class="form-control" id="password" placeholder="Min 6 characters" required>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label" for="confirmPassword">Confirm Password</label>
+        <input type="password" class="form-control" id="confirmPassword" placeholder="Repeat password" required>
+      </div>
+      <div class="col-12 mt-4">
+        <button type="submit" class="btn btn-primary w-100 py-2" id="regBtn">
+          <span class="spinner-border spinner-border-sm d-none me-2" id="regSpinner"></span>Create account
+        </button>
+      </div>
+    </form>
+
+    <div class="text-center mt-4">
+      <span class="text-muted small">Already have an account?</span>
+      <a href="login.html" class="small fw-semibold">Sign in</a>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="config/config.js"></script>
+  <script src="assets/js/api.js"></script>
+  <script src="assets/js/auth.js"></script>
+
+  <script>
+    function showError(msg) {
+      $("#regError").removeClass("d-none").text(msg);
+    }
+    function setLoading(on) {
+      $("#regSpinner").toggleClass("d-none", !on);
+      $("#regBtn").prop("disabled", on);
+    }
+
+    $("#regForm").on("submit", async function (e) {
+      e.preventDefault();
+      var payload = {
+        name: $("#name").val().trim(),
+        email: $("#email").val().trim(),
+        contactNo: $("#contactNo").val().trim(),
+        enrollmentNo: $("#enrollmentNo").val().trim(),
+        password: $("#password").val(),
+        confirmPassword: $("#confirmPassword").val(),
+      };
+      if (!payload.name || !payload.email || !payload.contactNo || !payload.enrollmentNo || !payload.password) {
+        showError("Please fill in all required fields.");
+        return;
+      }
+      if (payload.password.length < 6) {
+        showError("Password must be at least 6 characters.");
+        return;
+      }
+      if (payload.password !== payload.confirmPassword) {
+        showError("Passwords do not match.");
+        return;
+      }
+      setLoading(true);
+      try {
+        var user = await API.post("/api/auth/register", payload);
+        window.showToast("Account created — welcome, " + user.name.split(" ")[0] + "!");
+        setTimeout(function () { location.href = "student/dashboard.html"; }, 700);
+      } catch (err) {
+        showError(err.fieldErrors ? Object.values(err.fieldErrors).join(" · ") : (err.message || "Registration failed."));
+        setLoading(false);
+      }
+    });
+  </script>
+</body>
+</html>
