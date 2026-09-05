@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Log a Found Item — FINDLY</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="../assets/css/style.css" rel="stylesheet">
+  <link href="../assets/css/staff.css" rel="stylesheet">
+</head>
+<body data-page="log-found-item">
+  <main class="fin-main">
+    <div class="fin-page-head">
+      <h1 class="fin-page-title">Log a Found Item</h1>
+      <p class="fin-page-sub mb-0">The handed-in item goes into custody as Pending, then awaits admin approval to go live.</p>
+    </div>
+
+    <div class="fin-card" style="max-width:760px">
+      <div class="fin-card-body">
+        <form id="foundForm" novalidate class="row g-3">
+          <div class="col-md-8">
+            <label class="form-label" for="title">What was found? *</label>
+            <input type="text" class="form-control" id="title" name="title" maxlength="150" placeholder="e.g. Samsung Galaxy Watch" required>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label" for="categoryId">Category *</label>
+            <select class="form-select" id="categoryId" name="categoryId" required><option value="">Select…</option></select>
+          </div>
+          <div class="col-12">
+            <label class="form-label" for="description">Description *</label>
+            <textarea class="form-control" id="description" name="description" rows="4" minlength="10" maxlength="5000" placeholder="Condition, distinguishing marks, where exactly it was found…" required></textarea>
+          </div>
+          <div class="col-md-7">
+            <label class="form-label" for="location">Location found *</label>
+            <input type="text" class="form-control" id="location" name="location" maxlength="300" placeholder="e.g. Central Canteen, near Juice Corner" required>
+          </div>
+          <div class="col-md-5">
+            <label class="form-label" for="itemDate">Date found *</label>
+            <input type="date" class="form-control" id="itemDate" name="itemDate" max="2099-12-31" required>
+          </div>
+          <div class="col-md-8">
+            <label class="form-label" for="custodyLocation">Custody location *</label>
+            <input type="text" class="form-control" id="custodyLocation" name="custodyLocation" maxlength="200" placeholder="e.g. Campus Security Office, Block A" required>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label" for="custodyStatus">Custody status</label>
+            <select class="form-select" id="custodyStatus" name="custodyStatus">
+              <option value="IN_CUSTODY" selected>In custody</option>
+              <option value="MOVED">Moved</option>
+            </select>
+          </div>
+          <div class="col-12">
+            <label class="form-label" for="image">Photo <span class="fw-normal text-muted">(optional)</span></label>
+            <input type="file" class="form-control" id="image" name="image" accept="image/jpeg,image/png,image/webp">
+            <div class="form-text">JPG, PNG or WebP · max 5MB</div>
+          </div>
+          <div class="col-12 mt-4 d-flex gap-2">
+            <button type="submit" class="btn btn-primary px-4" id="submitBtn">
+              <span class="spinner-border spinner-border-sm d-none me-2" id="submitSpinner"></span>Log found item
+            </button>
+            <a href="dashboard.html" class="btn btn-light border">Cancel</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <script>window.BASE = "../";</script>
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="../config/config.js"></script>
+  <script src="../assets/js/api.js"></script>
+  <script src="../assets/js/auth.js"></script>
+  <script src="../assets/js/notifications.js"></script>
+  <script src="../assets/js/search-filter.js"></script>
+  <script src="../assets/js/student.js"></script>
+  <script src="../assets/js/staff.js"></script>
+  <script>
+    Auth.init(["STAFF", "ADMIN"]).then(function () {
+      SearchFilter.loadCategories(document.getElementById("categoryId"), false);
+    });
+
+    $("#foundForm").on("submit", async function (e) {
+      e.preventDefault();
+      var fd = new FormData();
+      fd.append("title", $("#title").val().trim());
+      fd.append("description", $("#description").val().trim());
+      fd.append("categoryId", $("#categoryId").val());
+      fd.append("location", $("#location").val().trim());
+      fd.append("itemDate", $("#itemDate").val());
+      fd.append("custodyLocation", $("#custodyLocation").val().trim());
+      fd.append("custodyStatus", $("#custodyStatus").val());
+      var img = $("#image")[0].files[0];
+      if (img) {
+        if (img.size > 5 * 1024 * 1024) { window.showToast("Image must be smaller than 5MB", "warning"); return; }
+        fd.append("image", img);
+      }
+      if (!fd.get("title") || !fd.get("description") || !fd.get("categoryId") || !fd.get("location") || !fd.get("itemDate") || !fd.get("custodyLocation")) {
+        window.showToast("Please complete all required fields.", "warning");
+        return;
+      }
+
+      $("#submitSpinner").removeClass("d-none");
+      $("#submitBtn").prop("disabled", true);
+      try {
+        await API.postForm("/api/items/found", fd);
+        window.showToast("Found item logged. It will go live after admin approval.");
+        $("#foundForm")[0].reset();
+        $("#custodyStatus").val("IN_CUSTODY");
+        setTimeout(function () { location.href = "manage-found-items.html"; }, 900);
+      } catch (err) {
+        var msg = err.fieldErrors ? Object.values(err.fieldErrors).join(" · ") : err.message;
+        window.showToast(msg, "danger");
+      } finally {
+        $("#submitSpinner").addClass("d-none");
+        $("#submitBtn").prop("disabled", false);
+      }
+    });
+  </script>
+</body>
+</html>

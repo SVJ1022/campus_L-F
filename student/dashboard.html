@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Student Dashboard — FINDLY</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="../assets/css/style.css" rel="stylesheet">
+  <link href="../assets/css/student.css" rel="stylesheet">
+</head>
+<body data-page="dashboard">
+  <main class="fin-main">
+    <div class="fin-page-head">
+      <h1 class="fin-page-title" id="greeting">Hello 👋</h1>
+      <p class="fin-page-sub">Here&rsquo;s what&rsquo;s happening with your lost items and the campus found list.</p>
+    </div>
+
+    <div class="row g-3 mb-4" id="statCards"></div>
+
+    <div class="row g-3 mb-4">
+      <div class="col-sm-6">
+        <a class="fin-quick" href="report-lost.html"><i class="bi bi-plus-circle"></i> Report a lost item</a>
+      </div>
+      <div class="col-sm-6">
+        <a class="fin-quick" href="browse-found.html"><i class="bi bi-search"></i> Browse found items</a>
+      </div>
+    </div>
+
+    <div class="fin-card">
+      <div class="fin-card-header">
+        <span>Recently found items</span>
+        <a href="browse-found.html" class="small fw-semibold">Browse all <i class="bi bi-arrow-right"></i></a>
+      </div>
+      <div class="fin-card-body">
+        <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-3" id="recentFound"></div>
+      </div>
+    </div>
+  </main>
+
+  <script>window.BASE = "../";</script>
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="../config/config.js"></script>
+  <script src="../assets/js/api.js"></script>
+  <script src="../assets/js/auth.js"></script>
+  <script src="../assets/js/notifications.js"></script>
+  <script src="../assets/js/search-filter.js"></script>
+  <script src="../assets/js/student.js"></script>
+  <script>
+    Auth.init(["STUDENT"]).then(function (user) {
+      var hour = new Date().getHours();
+      var part = hour < 12 ? "Good morning" : (hour < 17 ? "Good afternoon" : "Good evening");
+      $("#greeting").text(part + ", " + user.name.split(" ")[0] + " 👋");
+
+      loadSummary();
+      loadRecent();
+    });
+
+    async function loadSummary() {
+      try {
+        var d = await API.get("/api/dashboard/student");
+        var s = d.myLostByStatus || {};
+        var cards = [
+          { icon: "bi-journal-text", bg: "var(--fin-indigo-soft)", color: "var(--fin-indigo)", val: d.totalLostReports, label: "My lost reports" },
+          { icon: "bi-hourglass-split", bg: "var(--fin-found-bg)", color: "#b45309", val: s.PENDING || 0, label: "Pending review" },
+          { icon: "bi-check2-circle", bg: "var(--fin-success-bg)", color: "#15803d", val: s.ACTIVE || 0, label: "Reports live" },
+          { icon: "bi-box-seam", bg: "var(--fin-info-bg)", color: "#0369a1", val: d.activeFoundItems, label: "Found items on campus" },
+        ];
+        $("#statCards").html(
+          cards.map(function (c) {
+            return '<div class="col-6 col-lg-3"><div class="fin-stat">' +
+              '<div class="fin-stat-icon" style="background:' + c.bg + ";color:" + c.color + '"><i class="bi ' + c.icon + '"></i></div>' +
+              '<div><div class="fin-stat-val">' + c.val + '</div><div class="fin-stat-label">' + c.label + "</div></div></div></div>";
+          }).join("")
+        );
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    async function loadRecent() {
+      var box = $("#recentFound");
+      box.html(Student.loadingStateHTML());
+      try {
+        var d = await API.get("/api/items?type=FOUND&status=ACTIVE");
+        if (!d.items.length) {
+          box.html('<div class="col-12">' + Student.emptyState("No found items listed yet — check back soon.") + "</div>");
+        } else {
+          box.html(d.items.slice(0, 6).map(Student.itemCard).join(""));
+        }
+      } catch (err) {
+        box.html('<div class="col-12">' + Student.emptyState("Could not load found items.") + "</div>");
+      }
+    }
+  </script>
+</body>
+</html>

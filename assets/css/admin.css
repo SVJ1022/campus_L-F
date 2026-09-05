@@ -1,0 +1,33 @@
+/* ============================================================
+   FINDLY — Admin area additions
+   ============================================================ */
+
+.fin-activity-item {
+  display: flex;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--fin-border);
+}
+.fin-activity-item:last-child { border-bottom: none; }
+.fin-activity-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+.fin-activity-text { font-size: 0.86rem; }
+.fin-activity-time { font-size: 0.74rem; color: var(--fin-slate); }
+
+.fin-bar {
+  height: 10px;
+  border-radius: 999px;
+  background: var(--fin-bg);
+  overflow: hidden;
+}
+.fin-bar > div { height: 100%; border-radius: 999px; }
+
+.fin-user-status { font-size: 0.74rem; font-weight: 600; }

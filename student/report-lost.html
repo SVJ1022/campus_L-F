@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Report a Lost Item — FINDLY</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="../assets/css/style.css" rel="stylesheet">
+  <link href="../assets/css/student.css" rel="stylesheet">
+</head>
+<body data-page="report-lost">
+  <main class="fin-main">
+    <div class="fin-page-head">
+      <h1 class="fin-page-title">Report a Lost Item</h1>
+      <p class="fin-page-sub">Describe what you lost so staff and other students can spot it.</p>
+    </div>
+
+    <div class="fin-card" style="max-width:760px">
+      <div class="fin-card-body">
+        <form id="lostForm" novalidate class="row g-3">
+          <div class="col-md-8">
+            <label class="form-label" for="title">What did you lose? *</label>
+            <input type="text" class="form-control" id="title" name="title" maxlength="150" placeholder="e.g. Black Lenovo Laptop Charger" required>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label" for="categoryId">Category *</label>
+            <select class="form-select" id="categoryId" name="categoryId" required>
+              <option value="">Select…</option>
+            </select>
+          </div>
+          <div class="col-12">
+            <label class="form-label" for="description">Description *</label>
+            <textarea class="form-control" id="description" name="description" rows="4" minlength="10" maxlength="5000" placeholder="Colour, brand, markings, anything unique…" required></textarea>
+            <div class="form-text">Be specific — it helps the finder confirm it&rsquo;s genuinely yours.</div>
+          </div>
+          <div class="col-md-7">
+            <label class="form-label" for="location">Last seen location *</label>
+            <input type="text" class="form-control" id="location" name="location" maxlength="300" placeholder="e.g. Computer Lab 302, U &amp; P Umar Institute" required>
+          </div>
+          <div class="col-md-5">
+            <label class="form-label" for="itemDate">Date lost *</label>
+            <input type="date" class="form-control" id="itemDate" name="itemDate" required>
+          </div>
+          <div class="col-12">
+            <label class="form-label" for="image">Photo of the item <span class="fw-normal text-muted">(optional)</span></label>
+            <input type="file" class="form-control" id="image" name="image" accept="image/jpeg,image/png,image/webp">
+            <div class="form-text">JPG, PNG or WebP · max 5MB</div>
+            <div id="imgPreviewWrap" class="mt-2"></div>
+          </div>
+          <div class="col-12 mt-4 d-flex gap-2">
+            <button type="submit" class="btn btn-primary px-4" id="submitBtn">
+              <span class="spinner-border spinner-border-sm d-none me-2" id="submitSpinner"></span>Submit report
+            </button>
+            <a href="dashboard.html" class="btn btn-light border">Cancel</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <script>window.BASE = "../";</script>
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="../config/config.js"></script>
+  <script src="../assets/js/api.js"></script>
+  <script src="../assets/js/auth.js"></script>
+  <script src="../assets/js/notifications.js"></script>
+  <script src="../assets/js/search-filter.js"></script>
+  <script src="../assets/js/student.js"></script>
+  <script>
+    Auth.init(["STUDENT"]).then(async function () {
+      await SearchFilter.loadCategories(document.getElementById("categoryId"), false);
+      var today = new Date().toISOString().split("T")[0];
+      document.getElementById("itemDate").value = today;
+      document.getElementById("itemDate").max = today;
+
+      var editId = new URLSearchParams(location.search).get("edit");
+      if (editId) {
+        $(".fin-page-title").text("Edit Lost Item Report");
+        $(".fin-page-sub").text("Update the details of your earlier report.");
+        document.title = "Edit Report — FINDLY";
+        $("#submitBtn").html('<span class="spinner-border spinner-border-sm d-none me-2" id="submitSpinner"></span>Save changes');
+        loadForEdit(editId);
+      }
+    });
+
+    // Live image preview
+    $("#image").on("change", function () {
+      var file = this.files[0];
+      if (file && file.size > 5 * 1024 * 1024) {
+        window.showToast("Image must be smaller than 5MB", "warning");
+        $(this).val("");
+      }
+    });
+
+    $("#lostForm").on("submit", async function (e) {
+      e.preventDefault();
+      var fd = new FormData();
+      fd.append("title", $("#title").val().trim());
+      fd.append("description", $("#description").val().trim());
+      fd.append("categoryId", $("#categoryId").val());
+      fd.append("location", $("#location").val().trim());
+      fd.append("itemDate", $("#itemDate").val());
+      var img = $("#image")[0].files[0];
+      if (img) fd.append("image", img);
+
+      if (!fd.get("title") || !fd.get("description") || !fd.get("categoryId") || !fd.get("location") || !fd.get("itemDate")) {
+        window.showToast("Please complete all required fields.", "warning");
+        return;
+      }
+
+      $("#submitSpinner").removeClass("d-none");
+      $("#submitBtn").prop("disabled", true);
+      try {
+        var editId = new URLSearchParams(location.search).get("edit");
+        if (editId) {
+          await API.putForm("/api/items/" + editId, fd);
+          window.showToast("Report updated.");
+        } else {
+          await API.postForm("/api/items/lost", fd);
+          window.showToast("Report submitted! It will be visible after admin approval.");
+        }
+        if (editId) {
+          location.href = "my-reports.html";
+        } else {
+          $("#lostForm")[0].reset();
+          document.getElementById("itemDate").value = new Date().toISOString().split("T")[0];
+        }
+      } catch (err) {
+        var msg = err.fieldErrors ? Object.values(err.fieldErrors).join(" · ") : err.message;
+        window.showToast(msg, "danger");
+      } finally {
+        $("#submitSpinner").addClass("d-none");
+        $("#submitBtn").prop("disabled", false);
+      }
+    });
+
+    function loadForEdit(id) {
+      API.get("/api/items/" + id).then(function (d) {
+        var it = d.item;
+        if (it.itemType !== "LOST") {
+          window.showToast("Only your own lost reports can be edited.", "danger");
+          location.href = "my-reports.html";
+          return;
+        }
+        $("#title").val(it.title);
+        $("#description").val(it.description);
+        $("#categoryId").val(it.categoryId);
+        $("#location").val(it.location);
+        $("#itemDate").val(it.itemDate);
+        if (it.imageUrl) {
+          $("#imgPreviewWrap").html('<img src="' + ItemUI.image(it) + '" class="img-thumbnail" style="max-height:120px" alt="">');
+        }
+      }).catch(function (err) {
+        window.showToast(err.message, "danger");
+        location.href = "my-reports.html";
+      });
+    }
+  </script>
+</body>
+</html>

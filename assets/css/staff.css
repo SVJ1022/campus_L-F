@@ -1,0 +1,60 @@
+/* ============================================================
+   FINDLY — Staff area additions (denser, table-driven)
+   ============================================================ */
+
+.fin-stepper {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+.fin-step {
+  flex: 1 1 0;
+  min-width: 150px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  background: #fff;
+  border: 1px solid var(--fin-border);
+  border-radius: 12px;
+  padding: 10px 12px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--fin-slate);
+}
+.fin-step.active { border-color: var(--fin-indigo); color: var(--fin-indigo-dark); background: var(--fin-indigo-soft); }
+.fin-step.done { border-color: #bbf7d0; background: var(--fin-success-bg); color: #15803d; }
+.fin-step-num {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--fin-border);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.82rem;
+  flex-shrink: 0;
+}
+.fin-step.active .fin-step-num { background: var(--fin-indigo); }
+.fin-step.done .fin-step-num { background: #16a34a; }
+
+.fin-custody-pill {
+  display: inline-block;
+  font-size: 0.78rem;
+  font-weight: 600;
+  border-radius: 999px;
+  padding: 4px 10px;
+}
+.fin-custody-pill.IN_CUSTODY { background: var(--fin-info-bg); color: #0369a1; }
+.fin-custody-pill.MOVED { background: var(--fin-warning-bg); color: #b45309; }
+.fin-custody-pill.HANDED_OVER { background: var(--fin-lost-bg); color: #334155; }
+
+.fin-verify-note {
+  background: var(--fin-indigo-soft);
+  border: 1px dashed var(--fin-indigo);
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-size: 0.85rem;
+  color: var(--fin-indigo-dark);
+}
