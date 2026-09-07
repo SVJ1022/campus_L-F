@@ -1,0 +1,21 @@
+{
+  "name": "findly/backend",
+  "description": "FINDLY — Campus Lost & Found Management System (PHP 8+ API)",
+  "type": "project",
+  "license": "MIT",
+  "require": {
+    "php": ">=8.0",
+    "ext-pdo": "*",
+    "ext-pdo_mysql": "*",
+    "ext-json": "*",
+    "ext-fileinfo": "*"
+  },
+  "autoload": {
+    "psr-4": {
+      "Findly\\": "src/"
+    }
+  },
+  "scripts": {
+    "lint": "find src public routes config -name '*.php' -exec php -l {} \\;"
+  }
+}
