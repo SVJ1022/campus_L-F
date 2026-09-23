@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Manage Users — FINDLY</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="../assets/css/style.css" rel="stylesheet">
+  <link href="../assets/css/admin.css" rel="stylesheet">
+</head>
+<body data-page="manage-users">
+  <main class="fin-main">
+    <div class="fin-page-head">
+      <h1 class="fin-page-title">Manage Users</h1>
+      <p class="fin-page-sub mb-0">Activate, suspend or reactivate accounts. You cannot suspend your own account.</p>
+    </div>
+
+    <form id="filterForm" class="row g-2 mb-3" novalidate>
+      <div class="col-12 col-sm">
+        <input type="text" class="form-control" id="q" name="q" placeholder="Search name, email or number…">
+      </div>
+      <div class="col-6 col-sm-auto">
+        <select class="form-select" id="role" name="role">
+          <option value="">All roles</option>
+          <option value="STUDENT">Student</option>
+          <option value="STAFF">Staff</option>
+          <option value="ADMIN">Admin</option>
+        </select>
+      </div>
+      <div class="col-6 col-sm-auto">
+        <button type="submit" class="btn btn-primary w-100"><i class="bi bi-funnel me-1"></i>Filter</button>
+      </div>
+    </form>
+
+    <div class="fin-card">
+      <div class="fin-card-body p-0">
+        <div class="table-responsive">
+          <table class="table fin-table align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>User</th><th>Role</th><th>Contact</th><th>Status</th><th>Joined</th><th class="text-end">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="usersBody"></tbody>
+          </table>
+          <div class="fin-empty d-none" id="usersEmpty"><i class="bi bi-people"></i>No users found.</div>
+          <div class="fin-empty d-none" id="usersLoading"><div class="spinner-border spinner-border-sm text-primary me-2"></div>Loading…</div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>window.BASE = "../";</script>
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="../config/config.js"></script>
+  <script src="../assets/js/api.js"></script>
+  <script src="../assets/js/auth.js"></script>
+  <script src="../assets/js/notifications.js"></script>
+  <script src="../assets/js/search-filter.js"></script>
+  <script src="../assets/js/student.js"></script>
+  <script src="../assets/js/staff.js"></script>
+  <script src="../assets/js/admin.js"></script>
+  <script>
+    var currentUserId = null;
+    Auth.init(["ADMIN"]).then(function (u) { currentUserId = u.userId; load(); });
+
+    $("#filterForm").on("submit", function (e) { e.preventDefault(); load(); });
+
+    async function load() {
+      $("#usersLoading").removeClass("d-none");
+      $("#usersEmpty").addClass("d-none");
+      var params = SearchFilter.readForm(document.getElementById("filterForm"));
+      var qs = SearchFilter.toQueryString(params);
+      try {
+        var d = await API.get("/api/users" + (qs ? "?" + qs : ""));
+        var users = d.users;
+        var table = $("#usersBody");
+        table.empty();
+        if (!users.length) { $("#usersEmpty").removeClass("d-none"); }
+        users.forEach(function (u) {
+          var isMe = Number(u.userId) === currentUserId;
+          var statusBadge = '<span class="fin-user-status ' +
+            (u.accountStatus === "ACTIVE" ? "text-success" : u.accountStatus === "SUSPENDED" ? "text-danger" : "text-warning") + '">' +
+            '<i class="bi bi-circle-fill me-1" style="font-size:0.55rem"></i>' + u.accountStatus + "</span>";
+          var tr = document.createElement("tr");
+          tr.innerHTML =
+            "<td>" +
+              '<div class="d-flex align-items-center gap-2">' +
+                '<span class="fin-avatar" style="width:34px;height:34px;font-size:0.85rem">' + Auth.escapeHtml((u.name || "?").charAt(0)) + "</span>" +
+                "<div><div class='fw-semibold'>" + Auth.escapeHtml(u.name) + (isMe ? ' <span class="badge text-bg-light border small">you</span>' : "") + "</div>" +
+                '<div class="small text-muted">' + Auth.escapeHtml(u.email) + "</div></div></div></td>" +
+            "<td><span class='badge fin-badge-role'>" + Auth.roleLabel(u.role) + "</span></td>" +
+            "<td class='small'>" + Auth.escapeHtml(u.contactNo || "—") + "<div class='text-muted'>" + Auth.escapeHtml(u.enrollmentNo || "—") + "</div></td>" +
+            "<td>" + statusBadge + "</td>" +
+            "<td class='small text-muted'>" + window.formatDateTime(u.createdAt) + "</td>" +
+            "<td class='text-end whitespace-nowrap'>" + statusAction(u) + "</td>";
+          table.append(tr);
+        });
+        $("#usersLoading").addClass("d-none");
+      } catch (err) {
+        $("#usersLoading").addClass("d-none");
+        $("#usersBody").html('<tr><td class="py-4 text-center text-danger" colspan="6">Could not load users.</td></tr>');
+      }
+    }
+
+    function statusAction(u) {
+      if (Number(u.userId) === currentUserId) return '<span class="small text-muted">—</span>';
+      if (u.accountStatus === "ACTIVE") {
+        return '<button class="btn btn-sm btn-soft-danger suspend-btn" data-id="' + u.userId + '" data-name="' + Auth.escapeHtml(u.name) + '"><i class="bi bi-pause-circle me-1"></i>Suspend</button>';
+      }
+      return '<button class="btn btn-sm btn-soft-success activate-btn" data-id="' + u.userId + '" data-name="' + Auth.escapeHtml(u.name) + '"><i class="bi bi-play-circle me-1"></i>' +
+        (u.accountStatus === "SUSPENDED" ? "Reactivate" : "Activate") + "</button>";
+    }
+
+    $("#usersBody").on("click", ".suspend-btn", function () { setStatus(this, "SUSPENDED", "suspend"); });
+    $("#usersBody").on("click", ".activate-btn", function () { setStatus(this, "ACTIVE", "reactivate"); });
+
+    async function setStatus(btn, status, verb) {
+      var id = Number(btn.dataset.id), name = btn.dataset.name;
+      if (!confirm("Are you sure you want to " + verb + ' "' + name + '"?')) return;
+      btn.disabled = true;
+      var orig = btn.innerHTML;
+      try {
+        var d = await API.put("/api/users/" + id + "/status", { status: status });
+        window.showToast("User " + (verb === "suspend" ? "suspended" : "reactivated") + ".");
+        load();
+      } catch (err) {
+        window.showToast(err.message, "danger");
+        btn.disabled = false;
+        btn.innerHTML = orig;
+      }
+    }
+  </script>
+</body>
+</html>

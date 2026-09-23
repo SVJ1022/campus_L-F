@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Manage Categories — FINDLY</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="../assets/css/style.css" rel="stylesheet">
+  <link href="../assets/css/admin.css" rel="stylesheet">
+</head>
+<body data-page="manage-categories">
+  <main class="fin-main">
+    <div class="fin-page-head d-flex flex-wrap justify-content-between align-items-end gap-2">
+      <div>
+        <h1 class="fin-page-title">Manage Categories</h1>
+        <p class="fin-page-sub mb-0">Categories used across all lost &amp; found reports. Deleting a busy category is blocked.</p>
+      </div>
+      <button class="btn btn-primary" id="addCategoryBtn"><i class="bi bi-plus-lg me-1"></i>Add category</button>
+    </div>
+
+    <div class="row g-3" id="catsGrid"></div>
+  </main>
+
+  <script>window.BASE = "../";</script>
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="../config/config.js"></script>
+  <script src="../assets/js/api.js"></script>
+  <script src="../assets/js/auth.js"></script>
+  <script src="../assets/js/notifications.js"></script>
+  <script src="../assets/js/search-filter.js"></script>
+  <script src="../assets/js/student.js"></script>
+  <script src="../assets/js/staff.js"></script>
+  <script src="../assets/js/admin.js"></script>
+  <script>
+    Auth.init(["ADMIN"]).then(load);
+
+    async function load() {
+      var grid = $("#catsGrid");
+      grid.html('<div class="col-12"><div class="fin-empty"><div class="spinner-border spinner-border-sm text-primary me-2"></div>Loading…</div></div>');
+      try {
+        var d = await API.get("/api/categories");
+        grid.empty();
+        d.categories.forEach(function (c) {
+          var div = document.createElement("div");
+          div.className = "col-12 col-md-6 col-lg-4";
+          div.innerHTML =
+            '<div class="fin-card p-3 d-flex align-items-center justify-content-between gap-2">' +
+              '<div class="d-flex align-items-center gap-2"><div class="fin-stat-icon" style="background:var(--fin-indigo-soft);color:var(--fin-indigo);width:40px;height:40px"><i class="bi bi-tag"></i></div>' +
+              '<div class="fw-semibold">' + Auth.escapeHtml(c.categoryName) + "</div></div>" +
+              '<div class="d-flex gap-1">' +
+                '<button class="btn btn-sm btn-soft edit-btn" data-id="' + c.categoryId + '" data-name="' + Auth.escapeHtml(c.categoryName) + '"><i class="bi bi-pencil"></i></button>' +
+                '<button class="btn btn-sm btn-soft-danger delete-btn" data-id="' + c.categoryId + '" data-name="' + Auth.escapeHtml(c.categoryName) + '"><i class="bi bi-trash"></i></button>' +
+              "</div></div>";
+          grid.append(div);
+        });
+      } catch (err) {
+        grid.html('<div class="col-12"><div class="fin-empty fin-empty-error">Could not load categories.</div></div>');
+      }
+    }
+
+    function categoryModal(mode) {
+      var modal = document.createElement("div");
+      modal.className = "modal fade";
+      modal.id = "catModal";
+      modal.innerHTML =
+        '<div class="modal-dialog"><div class="modal-content">' +
+          '<div class="modal-header"><h5 class="modal-title">' + (mode === "edit" ? "Edit category" : "Add category") + "</h5>" +
+          '<button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>' +
+          '<div class="modal-body"><label class="form-label">Category name</label>' +
+          '<input type="text" class="form-control" id="catName" maxlength="80"></div>' +
+          '<div class="modal-footer"><button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>' +
+          '<button type="button" class="btn btn-primary" id="catSave"><span class="spinner-border spinner-border-sm d-none me-2" id="catSpinner"></span>Save</button></div>' +
+        "</div></div>";
+      document.body.appendChild(modal);
+      return window.bootstrap.Modal.getOrCreateInstance(modal);
+    }
+
+    $("#addCategoryBtn").on("click", function () {
+      var bi = categoryModal("add");
+      $("#catName").val("");
+      $("#catSave").off("click").on("click", async function () {
+        await saveCategory(null, $("#catName").val().trim(), bi, this);
+      });
+      bi.show();
+    });
+
+    $("#catsGrid").on("click", ".edit-btn", function () {
+      var bi = categoryModal("edit");
+      $("#catName").val($(this).data("name"));
+      var id = Number($(this).data("id"));
+      $("#catSave").off("click").on("click", async function () {
+        await saveCategory(id, $("#catName").val().trim(), bi, this);
+      });
+      bi.show();
+    });
+
+    $("#catsGrid").on("click", ".delete-btn", async function () {
+      var id = Number(this.dataset.id), name = this.dataset.name;
+      if (!confirm('Delete category "' + name + '"?')) return;
+      try {
+        await API.del("/api/categories/" + id);
+        window.showToast("Category deleted.");
+        location.reload();
+      } catch (err) {
+        window.showToast(err.message, "danger");
+      }
+    });
+
+    async function saveCategory(id, name, modal, btn) {
+      if (!name) { window.showToast("Category name is required.", "warning"); return; }
+      $(btn).prop("disabled", true);
+      $("#catSpinner").removeClass("d-none");
+      try {
+        if (id) { await API.put("/api/categories/" + id, { categoryName: name }); }
+        else { await API.post("/api/categories", { categoryName: name }); }
+        window.showToast(id ? "Category updated." : "Category added.");
+        modal.hide();
+        location.reload();
+      } catch (err) {
+        window.showToast(err.message, "danger");
+      }
+      $(btn).prop("disabled", false);
+      $("#catSpinner").addClass("d-none");
+    }
+  </script>
+</body>
+</html>
